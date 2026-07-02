@@ -1,0 +1,848 @@
+[
+ {
+  "file": "hall-001.jpg",
+  "orig": "10501356579824279959-634efe35605e48d1.png",
+  "w": 1200,
+  "h": 655
+ },
+ {
+  "file": "hall-002.jpg",
+  "orig": "12342080185476508836-a0961734bc01be05.png",
+  "w": 1200,
+  "h": 670
+ },
+ {
+  "file": "hall-003.jpg",
+  "orig": "15979228943283840733-0fd7b86e46a771d3.png",
+  "w": 1200,
+  "h": 654
+ },
+ {
+  "file": "hall-004.jpg",
+  "orig": "1653261932549647008-725b2018d939be58.png",
+  "w": 1200,
+  "h": 670
+ },
+ {
+  "file": "hall-005.jpg",
+  "orig": "16594027326819733981-5b98faae98596c73.png",
+  "w": 1200,
+  "h": 655
+ },
+ {
+  "file": "hall-006.jpg",
+  "orig": "17003744067412755611-a73f6ff03aefd7c0.png",
+  "w": 1200,
+  "h": 655
+ },
+ {
+  "file": "hall-007.jpg",
+  "orig": "1770867113597-efc954557284da8c.jpg",
+  "w": 479,
+  "h": 1000
+ },
+ {
+  "file": "hall-008.jpg",
+  "orig": "1771508383271-f4c2d08c40e43b8d.jpg",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-009.jpg",
+  "orig": "1771783764922-197c4798bff97c29.jpg",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-010.jpg",
+  "orig": "17866523699777433221-a41017aaea07a20d.png",
+  "w": 1200,
+  "h": 670
+ },
+ {
+  "file": "hall-011.jpg",
+  "orig": "2293-948b3047957a3a5a.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-012.jpg",
+  "orig": "2298-948b3047957a3a5a.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-013.jpg",
+  "orig": "2298-b7d9d50873d6f84c.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-014.jpg",
+  "orig": "2345-948b3047957a3a5a.png",
+  "w": 245,
+  "h": 512
+ },
+ {
+  "file": "hall-015.jpg",
+  "orig": "2346-948b3047957a3a5a.png",
+  "w": 245,
+  "h": 512
+ },
+ {
+  "file": "hall-016.jpg",
+  "orig": "2348-948b3047957a3a5a.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-017.jpg",
+  "orig": "2349-948b3047957a3a5a.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-018.jpg",
+  "orig": "2350-948b3047957a3a5a.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-019.jpg",
+  "orig": "2351-948b3047957a3a5a.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-020.jpg",
+  "orig": "2352-948b3047957a3a5a.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-021.jpg",
+  "orig": "2425388550630989725-7d224f75618ce683.png",
+  "w": 1200,
+  "h": 670
+ },
+ {
+  "file": "hall-022.jpg",
+  "orig": "2575-937f52640c05e5e8.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-023.jpg",
+  "orig": "2584-61b66aa9434c4a9d.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-024.jpg",
+  "orig": "2584-7963ce6882b17b73.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-025.jpg",
+  "orig": "2605-4817498e9b2b13c2.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-026.jpg",
+  "orig": "2611-3f25447f7ee96fb0.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-027.jpg",
+  "orig": "2633-9e6e323d39aa9745.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-028.jpg",
+  "orig": "2639-fd2f6c3e275a2c5f.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-029.jpg",
+  "orig": "2653-518bf767c1319f57.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-030.jpg",
+  "orig": "2674-24462b8426e850ad.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-031.jpg",
+  "orig": "2674-c0ab7d4e6892d01a.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-032.jpg",
+  "orig": "2701501206347894572-701b805dc2944f39.png",
+  "w": 1200,
+  "h": 655
+ },
+ {
+  "file": "hall-033.jpg",
+  "orig": "2716-256601538cca7d08.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-034.jpg",
+  "orig": "2726-a6c0f6795b12b10c.png",
+  "w": 478,
+  "h": 1000
+ },
+ {
+  "file": "hall-035.jpg",
+  "orig": "2727-41e61828faf577a0.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-036.jpg",
+  "orig": "2729-256601538cca7d08.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-037.jpg",
+  "orig": "2729-41e61828faf577a0.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-038.jpg",
+  "orig": "2757-256601538cca7d08.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-039.jpg",
+  "orig": "2768-3daec8a01a8c7874.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-040.jpg",
+  "orig": "2774-94e23fe1ea22d831.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-041.jpg",
+  "orig": "2796-0134869356c853fd.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-042.jpg",
+  "orig": "2798-256601538cca7d08.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-043.jpg",
+  "orig": "2798-9504d0837823f637.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-044.jpg",
+  "orig": "2799-79463d720f3c4c7e.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-045.jpg",
+  "orig": "2799-f9afba55b8aeecc7.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-046.jpg",
+  "orig": "2806-4a257d3bca57d72d.jpg",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-047.jpg",
+  "orig": "2806-6bd235245c43a02a.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-048.jpg",
+  "orig": "2820-f075696e7d74b6e1.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-049.jpg",
+  "orig": "2822-f0dafc71e13ddf47.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-050.jpg",
+  "orig": "2880-b3d119e02c2bafb4.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-051.jpg",
+  "orig": "2898-f075696e7d74b6e1.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-052.jpg",
+  "orig": "2902-f075696e7d74b6e1.jpg",
+  "w": 563,
+  "h": 984
+ },
+ {
+  "file": "hall-053.jpg",
+  "orig": "2905-75d621ad46d8d9f0.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-054.jpg",
+  "orig": "2906-b0ad98288a0ff9c7.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-055.jpg",
+  "orig": "2907-052eeda331d987f6.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-056.jpg",
+  "orig": "2907-f4c2d08c40e43b8d.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-057.jpg",
+  "orig": "2912-4a257d3bca57d72d.png",
+  "w": 245,
+  "h": 512
+ },
+ {
+  "file": "hall-058.jpg",
+  "orig": "2912-b3d119e02c2bafb4.png",
+  "w": 245,
+  "h": 512
+ },
+ {
+  "file": "hall-059.jpg",
+  "orig": "2913-ebc2983f503ef75f.png",
+  "w": 245,
+  "h": 512
+ },
+ {
+  "file": "hall-060.jpg",
+  "orig": "2941-6b95dcd3b0cf2cbd.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-061.jpg",
+  "orig": "2962-1a465cf0c15eb6ed.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-062.jpg",
+  "orig": "2962-b3d119e02c2bafb4.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-063.jpg",
+  "orig": "2963-1a465cf0c15eb6ed.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-064.jpg",
+  "orig": "2963-b3d119e02c2bafb4.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-065.jpg",
+  "orig": "2964-b3d119e02c2bafb4.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-066.jpg",
+  "orig": "2965-1a465cf0c15eb6ed.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-067.jpg",
+  "orig": "2965-f4431900842d03dd.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-068.jpg",
+  "orig": "2966-1a465cf0c15eb6ed.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-069.jpg",
+  "orig": "2966-fc17a32367e12573.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-070.jpg",
+  "orig": "2967-1a465cf0c15eb6ed.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-071.jpg",
+  "orig": "3026-450ebbfe0f5ce2b8.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-072.jpg",
+  "orig": "3031-fc17a32367e12573.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-073.jpg",
+  "orig": "3034-23f4552063b0b22b.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-074.jpg",
+  "orig": "3035-fc17a32367e12573.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-075.jpg",
+  "orig": "3052-c64c65744ce73dc2.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-076.jpg",
+  "orig": "3052-fc17a32367e12573.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-077.jpg",
+  "orig": "3053-5da9ce3bf20e63f6.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-078.jpg",
+  "orig": "3054-4a257d3bca57d72d.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-079.jpg",
+  "orig": "3054-53740515dda9d297.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-080.jpg",
+  "orig": "3055-fc17a32367e12573.png",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-081.jpg",
+  "orig": "3077-3cf8cc0ffe8d13bf.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-082.jpg",
+  "orig": "3086-3cf8cc0ffe8d13bf.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-083.jpg",
+  "orig": "3111-3cf8cc0ffe8d13bf.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-084.jpg",
+  "orig": "3112-3cf8cc0ffe8d13bf.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-085.jpg",
+  "orig": "3113-3cf8cc0ffe8d13bf.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-086.jpg",
+  "orig": "3114-3cf8cc0ffe8d13bf.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-087.jpg",
+  "orig": "3115-3cf8cc0ffe8d13bf.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-088.jpg",
+  "orig": "3115-d1bd0e94becefab7.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-089.jpg",
+  "orig": "3116-f1a3c176d5d75318.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-090.jpg",
+  "orig": "3117-d1bd0e94becefab7.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-091.jpg",
+  "orig": "3118-f1a3c176d5d75318.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-092.jpg",
+  "orig": "3122-d1bd0e94becefab7.png",
+  "w": 512,
+  "h": 341
+ },
+ {
+  "file": "hall-093.jpg",
+  "orig": "3122-f1a3c176d5d75318.png",
+  "w": 512,
+  "h": 341
+ },
+ {
+  "file": "hall-094.jpg",
+  "orig": "3123-f1a3c176d5d75318.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-095.jpg",
+  "orig": "3124-f1a3c176d5d75318.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-096.jpg",
+  "orig": "3125-571a25c2b5c2c5aa.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-097.jpg",
+  "orig": "3126-571a25c2b5c2c5aa.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-098.jpg",
+  "orig": "3128-571a25c2b5c2c5aa.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-099.jpg",
+  "orig": "3130-571a25c2b5c2c5aa.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-100.jpg",
+  "orig": "3131-571a25c2b5c2c5aa.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-101.jpg",
+  "orig": "3132-50d236d506a5b329.png",
+  "w": 341,
+  "h": 512
+ },
+ {
+  "file": "hall-102.jpg",
+  "orig": "3132-571a25c2b5c2c5aa.png",
+  "w": 341,
+  "h": 512
+ },
+ {
+  "file": "hall-103.jpg",
+  "orig": "3133-50d236d506a5b329.png",
+  "w": 341,
+  "h": 512
+ },
+ {
+  "file": "hall-104.jpg",
+  "orig": "3133-571a25c2b5c2c5aa.png",
+  "w": 341,
+  "h": 512
+ },
+ {
+  "file": "hall-105.jpg",
+  "orig": "3136-50d236d506a5b329.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-106.jpg",
+  "orig": "3137-50d236d506a5b329.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-107.jpg",
+  "orig": "3138-50d236d506a5b329.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-108.jpg",
+  "orig": "3139-50d236d506a5b329.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-109.jpg",
+  "orig": "3141-718d3cc7d4e9b9fe.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-110.jpg",
+  "orig": "3142-9e3d63c618a1eefa.png",
+  "w": 512,
+  "h": 512
+ },
+ {
+  "file": "hall-111.jpg",
+  "orig": "3148-84be18bb98561f7f.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-112.jpg",
+  "orig": "3149-09f8d6d98669f700.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-113.jpg",
+  "orig": "3149-7678341618fa581e.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-114.jpg",
+  "orig": "3150-718d3cc7d4e9b9fe.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-115.jpg",
+  "orig": "3150-84be18bb98561f7f.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-116.jpg",
+  "orig": "3153-3cf8cc0ffe8d13bf.jpg",
+  "w": 892,
+  "h": 1000
+ },
+ {
+  "file": "hall-117.jpg",
+  "orig": "3153-99ebcd054f0d988e.jpg",
+  "w": 892,
+  "h": 1000
+ },
+ {
+  "file": "hall-118.jpg",
+  "orig": "3295-5cbf7b77495bad50.png",
+  "w": 667,
+  "h": 1000
+ },
+ {
+  "file": "hall-119.jpg",
+  "orig": "4450-09dd0dea849eadcf.png",
+  "w": 1000,
+  "h": 667
+ },
+ {
+  "file": "hall-120.jpg",
+  "orig": "4467-010d3b2de8b6e390.jpg",
+  "w": 1000,
+  "h": 1000
+ },
+ {
+  "file": "hall-121.jpg",
+  "orig": "4997810906914912849-fd8759d558262b76(1).png",
+  "w": 1200,
+  "h": 655
+ },
+ {
+  "file": "hall-122.jpg",
+  "orig": "5801-935a5950e46a6cd5 (1).png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-123.jpg",
+  "orig": "5803-7e3fb4999736d7b2 (2).png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-124.jpg",
+  "orig": "5807-7e3fb4999736d7b2 (1).png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-125.jpg",
+  "orig": "5809-0fd7b86e46a771d3.png",
+  "w": 512,
+  "h": 510
+ },
+ {
+  "file": "hall-126.jpg",
+  "orig": "5809-7e3fb4999736d7b2.png",
+  "w": 512,
+  "h": 510
+ },
+ {
+  "file": "hall-127.jpg",
+  "orig": "6098-c53de85cd5a45b41.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-128.jpg",
+  "orig": "6099-1b6e356d9ccd0b3a.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-129.jpg",
+  "orig": "6099-5f024dc8d58d2e83.png",
+  "w": 1000,
+  "h": 545
+ },
+ {
+  "file": "hall-130.jpg",
+  "orig": "6107-bdc474c766688fde.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-131.jpg",
+  "orig": "6108-16affe580e70f107.jpg",
+  "w": 1000,
+  "h": 544
+ },
+ {
+  "file": "hall-132.jpg",
+  "orig": "6109-43be55a1e7416b52.png",
+  "w": 512,
+  "h": 279
+ },
+ {
+  "file": "hall-133.jpg",
+  "orig": "6131-1b6e356d9ccd0b3a.png",
+  "w": 562,
+  "h": 1000
+ },
+ {
+  "file": "hall-134.jpg",
+  "orig": "6131-c53de85cd5a45b41.png",
+  "w": 562,
+  "h": 1000
+ },
+ {
+  "file": "hall-135.jpg",
+  "orig": "6133-a04841fa03518a86.png",
+  "w": 562,
+  "h": 1000
+ },
+ {
+  "file": "hall-136.jpg",
+  "orig": "6134-79463d720f3c4c7e.png",
+  "w": 600,
+  "h": 1000
+ },
+ {
+  "file": "hall-137.jpg",
+  "orig": "7090746798181818034-0a8cf8ef97340cd4.png",
+  "w": 1028,
+  "h": 1024
+ },
+ {
+  "file": "hall-138.jpg",
+  "orig": "8179-5f024dc8d58d2e83.jpg",
+  "w": 462,
+  "h": 1000
+ },
+ {
+  "file": "hall-139.jpg",
+  "orig": "8492521984126405003-be36af12d6887d35.png",
+  "w": 1200,
+  "h": 655
+ },
+ {
+  "file": "hall-140.jpg",
+  "orig": "9311279678874805395-340c43b9cc2e76ad.png",
+  "w": 805,
+  "h": 1200
+ },
+ {
+  "file": "hall-141.jpg",
+  "orig": "u3921397598_Image_of_The_Archangel_Michael_a_colossal_awe-ins_97a652a7-1608-4bc6-9d81-0e4ebd472a86_0.png",
+  "w": 673,
+  "h": 1200
+ }
+]
