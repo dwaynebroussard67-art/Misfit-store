@@ -51,7 +51,7 @@ export default async function handler(
       // Fetch product to get price
       const { data: product } = await supabase
         .from('store_products')
-        .select('price_cents, printify_product_id')
+        .select('price_cents')
         .eq('id', productId)
         .single();
 

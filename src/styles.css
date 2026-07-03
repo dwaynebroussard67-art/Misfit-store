@@ -46,3 +46,232 @@ img { max-width: 100%; height: auto; display: block; }
   .products { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
   .product-card { padding: 12px; }
 }
+
+/* ═══════════ THE HALL — display windows ═══════════ */
+
+.hall-head { margin-bottom: 40px; }
+.hall-head h2 { font-size: 30px; letter-spacing: 2px; }
+.hall-head p { color: rgba(237,230,217,0.55); font-style: italic; }
+.hall-empty { text-align: center; color: rgba(237,230,217,0.6); padding: 80px 20px; }
+
+.windows { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 36px; }
+
+/* The signature: a lit display window in a dark hall */
+.window {
+  position: relative;
+  background: linear-gradient(180deg, #0d0d0d 0%, #131210 55%, #1a1610 100%);
+  border: 1px solid rgba(212,175,55,0.28);
+  border-radius: 10px 10px 3px 3px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 -60px 70px -60px rgba(212,175,55,0.35),  /* glow rising from the sill */
+    0 8px 24px rgba(0,0,0,0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+}
+.window:hover {
+  border-color: rgba(212,175,55,0.6);
+  box-shadow:
+    inset 0 -60px 80px -55px rgba(212,175,55,0.5),
+    0 12px 32px rgba(0,0,0,0.7);
+}
+
+.window-glass { position: relative; background: #070707; }
+.window-art { width: 100%; aspect-ratio: 1; object-fit: cover; }
+.window-art.placeholder {
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(237,230,217,0.3); font-size: 13px;
+}
+
+.window-sill { padding: 16px 16px 18px; }
+.window-name { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+
+/* Brass price plaque */
+.plaque {
+  display: inline-block;
+  background: linear-gradient(180deg, rgba(212,175,55,0.22), rgba(212,175,55,0.08));
+  border: 1px solid rgba(212,175,55,0.5);
+  color: var(--gold);
+  font-size: 17px; font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 3px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+.plaque:disabled { cursor: default; }
+
+/* ─────────── Forge Mode (owner editing) ─────────── */
+
+.window.forge { border-color: rgba(201,122,26,0.55); }
+.window.forge .window-glass { cursor: pointer; }
+.window.dragging {
+  transform: scale(1.04) rotate(-1deg);
+  border-color: var(--ember);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.85), 0 0 0 1px var(--ember);
+  z-index: 5;
+}
+.window.shuttered { opacity: 0.45; }
+.window.shuttered::after {
+  content: 'SHUTTERED';
+  position: absolute; top: 12px; right: -34px;
+  transform: rotate(38deg);
+  background: var(--blood); color: var(--bone);
+  font-size: 10px; letter-spacing: 2px; padding: 3px 40px;
+  pointer-events: none;
+}
+
+.window-tools {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid rgba(201,122,26,0.35);
+  background: rgba(201,122,26,0.08);
+}
+.drag-handle {
+  flex: 1;
+  background: none; color: var(--ember);
+  font-size: 18px; padding: 8px;
+  cursor: grab; touch-action: none;
+  letter-spacing: 4px;
+}
+.drag-handle:active { cursor: grabbing; }
+.tool-btn {
+  background: none; color: rgba(237,230,217,0.75);
+  font-size: 12px; padding: 8px 12px;
+  border-left: 1px solid rgba(201,122,26,0.35);
+}
+.tool-btn:hover { color: var(--bone); }
+
+.window-name.editable, .plaque.editable { cursor: pointer; }
+.window-name.editable:hover { color: var(--ember); }
+.plaque.editable:hover { border-color: var(--ember); color: var(--ember); }
+
+.inline-edit {
+  background: #0a0a0a;
+  border: 1px solid var(--ember);
+  color: var(--bone);
+  font-family: inherit;
+  padding: 6px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+.inline-edit.price { max-width: 120px; font-size: 17px; color: var(--gold); }
+.inline-edit:focus { outline: none; box-shadow: 0 0 0 2px rgba(201,122,26,0.3); }
+
+.glass-hint {
+  position: absolute; inset: auto 0 0 0;
+  background: rgba(10,10,10,0.82);
+  color: rgba(237,230,217,0.8);
+  font-size: 11px; text-align: center; padding: 6px;
+  opacity: 0; transition: opacity 0.2s;
+  pointer-events: none;
+}
+.window-glass:hover .glass-hint { opacity: 1; }
+
+.add-window {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px; min-height: 320px;
+  background: none;
+  border: 2px dashed rgba(201,122,26,0.4);
+  border-radius: 10px 10px 3px 3px;
+  color: rgba(237,230,217,0.6);
+  font-family: inherit; font-size: 14px;
+  transition: border-color 0.2s, color 0.2s;
+}
+.add-window:hover { border-color: var(--ember); color: var(--bone); }
+.add-glyph { font-size: 34px; color: var(--ember); }
+.add-note { font-size: 11px; color: rgba(237,230,217,0.4); }
+
+/* ─────────── Owner bar / login ─────────── */
+
+.owner-corner { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.owner-link {
+  background: none; color: rgba(237,230,217,0.35);
+  font-size: 12px; letter-spacing: 1px;
+}
+.owner-link:hover { color: var(--gold); }
+
+.owner-login {
+  background: #111; border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 6px; padding: 16px; width: min(320px, 100%);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.owner-login-title { font-size: 13px; letter-spacing: 1px; color: var(--gold); }
+.owner-login input {
+  background: #0a0a0a; border: 1px solid rgba(212,175,55,0.3);
+  color: var(--bone); padding: 9px 12px; border-radius: 3px; font-family: inherit;
+}
+.owner-login input:focus { outline: none; border-color: var(--gold); }
+.owner-login-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.owner-error { color: var(--blood); font-size: 12px; }
+
+.owner-btn {
+  padding: 8px 16px; border-radius: 3px; font-size: 13px; font-weight: 600;
+  font-family: inherit; transition: opacity 0.2s;
+}
+.owner-btn.small { padding: 5px 12px; font-size: 12px; }
+.owner-btn.solid { background: var(--gold); color: var(--void); }
+.owner-btn.ghost { background: none; color: rgba(237,230,217,0.7); border: 1px solid rgba(237,230,217,0.25); }
+.owner-btn:hover:not(:disabled) { opacity: 0.85; }
+.owner-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.forge-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  border: 1px solid rgba(201,122,26,0.35);
+  background: rgba(201,122,26,0.06);
+  border-radius: 6px; padding: 10px 14px; margin-bottom: 28px;
+}
+.forge-bar.on { border-color: var(--ember); background: rgba(201,122,26,0.12); }
+.forge-label { color: var(--ember); font-weight: 600; letter-spacing: 1px; font-size: 14px; }
+.forge-status { flex: 1; font-size: 12px; color: rgba(237,230,217,0.6); min-width: 140px; }
+
+.forge-toggle {
+  width: 46px; height: 24px; border-radius: 12px;
+  background: rgba(237,230,217,0.15);
+  position: relative; transition: background 0.2s;
+}
+.forge-toggle.on { background: var(--ember); }
+.forge-knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--bone); transition: left 0.2s;
+}
+.forge-toggle.on .forge-knob { left: 25px; }
+
+/* ─────────── Artwork picker ─────────── */
+
+.picker-backdrop {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.75);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.picker {
+  background: #111; border: 1px solid rgba(212,175,55,0.4);
+  border-radius: 8px; width: min(560px, 100%); max-height: 85vh;
+  overflow-y: auto; padding: 18px;
+}
+.picker-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px; color: var(--gold); letter-spacing: 1px; font-size: 14px;
+}
+.picker-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px; margin-bottom: 14px;
+}
+.picker-thumb {
+  background: none; padding: 0;
+  border: 2px solid transparent; border-radius: 4px; overflow: hidden;
+}
+.picker-thumb img { aspect-ratio: 1; object-fit: cover; width: 100%; }
+.picker-thumb.active, .picker-thumb:hover { border-color: var(--gold); }
+.picker-custom { display: flex; gap: 8px; }
+.picker-custom input {
+  flex: 1; background: #0a0a0a; border: 1px solid rgba(212,175,55,0.3);
+  color: var(--bone); padding: 9px 12px; border-radius: 3px; font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window, .window:hover, .window.dragging { transition: none; transform: none; }
+}
+@media (max-width: 640px) {
+  .windows { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; }
+  .forge-status { display: none; }
+}
