@@ -5,3 +5,7 @@ dist/
 *.log
 .vercel
 .env*
+
+# TypeScript build output (noEmit should prevent these, but guard anyway)
+*.d.ts
+!src/vite-env.d.ts
