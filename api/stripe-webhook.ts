@@ -2,12 +2,28 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
+// Stripe needs the raw request body to verify the signature; Vercel's
+// default body parser would JSON-parse it first and break verification.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
+
+async function buffer(req: VercelRequest): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 export default async function handler(
   req: VercelRequest,
@@ -27,8 +43,9 @@ export default async function handler(
   let event: Stripe.Event;
 
   try {
+    const rawBody = await buffer(req);
     event = stripe.webhooks.constructEvent(
-      req.body,
+      rawBody,
       sig,
       webhookSecret
     );
