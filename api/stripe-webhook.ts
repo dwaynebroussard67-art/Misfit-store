@@ -17,6 +17,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
+interface OrderItem {
+  product_id: string;
+  size: string | null;
+  quantity: number;
+}
+
 async function buffer(req: VercelRequest): Promise<Buffer> {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -53,124 +59,120 @@ export default async function handler(
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
-  // Handle checkout.session.completed
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session;
-
-    try {
-      // Extract metadata
-      const productId = session.metadata?.product_id;
-      const size = session.metadata?.size || null;
-      const quantity = parseInt(session.metadata?.quantity || '1');
-      const productName = session.metadata?.product_name || 'Unknown';
-      const email = session.customer_email || 'unknown@example.com';
-
-      // Fetch product to get price
-      const { data: product } = await supabase
-        .from('store_products')
-        .select('price_cents')
-        .eq('id', productId)
-        .single();
-
-      const priceCents = product?.price_cents || 0;
-
-      // Create order in Supabase
-      const { data: order, error: orderError } = await supabase
-        .from('store_orders')
-        .insert([
-          {
-            stripe_session_id: session.id,
-            product_id: productId,
-            product_name: productName,
-            customer_email: email,
-            size: size,
-            quantity: quantity,
-            price_cents: priceCents,
-            status: 'completed',
-          },
-        ])
-        .select()
-        .single();
-
-      if (orderError) {
-        console.error('Error creating order:', orderError);
-        return res.status(500).json({ error: 'Failed to create order' });
-      }
-
-      // Send ntfy notification
-      const ntfyTopic = process.env.NTFY_TOPIC || 'misfit-store-orders';
-      const ntfyUrl = `https://ntfy.sh/${ntfyTopic}`;
-
-      const notificationMessage = `
-New Order: #${order.id.slice(0, 8)}
-Product: ${productName}
-Email: ${email}
-Size: ${size || 'N/A'}
-Qty: ${quantity}
-Amount: $${(priceCents / 100).toFixed(2)}
-      `.trim();
-
-      try {
-        await fetch(ntfyUrl, {
-          method: 'POST',
-          headers: { 'Title': `MISFIT Store Order` },
-          body: notificationMessage,
-        });
-      } catch (ntfyErr) {
-        console.warn('ntfy notification failed (non-blocking):', ntfyErr);
-      }
-
-      // Optional: Forward to Printify if API key present
-      if (process.env.PRINTIFY_API_KEY && product?.printify_product_id) {
-        try {
-          // Create Printify order (simplified example)
-          const printifyResponse = await fetch(
-            'https://api.printful.com/orders',
-            {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${process.env.PRINTIFY_API_KEY}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                recipient: {
-                  name: email.split('@')[0],
-                  email: email,
-                },
-                items: [
-                  {
-                    product_id: product.printify_product_id,
-                    quantity: quantity,
-                    variant_id: size, // May need mapping depending on Printify API
-                  },
-                ],
-              }),
-            }
-          );
-
-          if (printifyResponse.ok) {
-            const printifyOrder = await printifyResponse.json();
-            // Update order with printify_order_id
-            await supabase
-              .from('store_orders')
-              .update({
-                printify_order_id: printifyOrder.id,
-                status: 'fulfilled',
-              })
-              .eq('id', order.id);
-          }
-        } catch (printifyErr) {
-          console.warn('Printify integration failed (non-blocking):', printifyErr);
-        }
-      }
-
-      return res.status(200).json({ received: true, orderId: order.id });
-    } catch (err: any) {
-      console.error('Webhook processing error:', err);
-      return res.status(500).json({ error: err.message });
-    }
+  if (event.type !== 'checkout.session.completed') {
+    // Acknowledge other event types
+    return res.status(200).json({ received: true });
   }
 
-  // Acknowledge other event types
-  return res.status(200).json({ received: true });
+  const session = event.data.object as Stripe.Checkout.Session;
+
+  try {
+    const items: OrderItem[] = JSON.parse(session.metadata?.items || '[]');
+    const email = session.customer_email || session.customer_details?.email || 'unknown@example.com';
+
+    if (items.length === 0) {
+      console.error('Webhook: checkout.session.completed with no items in metadata', session.id);
+      return res.status(200).json({ received: true, skipped: 'no items' });
+    }
+
+    // Order header. stripe_session_id is UNIQUE, so a Stripe retry that
+    // re-delivers this event hits a conflict here instead of double-billing
+    // the order — treat that as "already processed" and stop.
+    const { data: order, error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        stripe_session_id: session.id,
+        customer_email: email,
+        customer_phone: session.customer_details?.phone || null,
+        shipping_name: session.customer_details?.name || null,
+        shipping_address: session.customer_details?.address || null,
+        amount_total_cents: session.amount_total ?? 0,
+        status: 'paid',
+      })
+      .select()
+      .single();
+
+    if (orderError) {
+      if (orderError.code === '23505') {
+        // Unique violation on stripe_session_id: already processed.
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+      console.error('Error creating order header:', orderError);
+      return res.status(500).json({ error: 'Failed to create order' });
+    }
+
+    // Line items: look up current product names/prices from the DB (never
+    // trust metadata for money), then write one store_orders row per item.
+    const productIds = items.map((i) => i.product_id);
+    const { data: products, error: productsError } = await supabase
+      .from('store_products')
+      .select('id, name, price_cents')
+      .in('id', productIds);
+
+    if (productsError) {
+      console.error('Error fetching products for order:', productsError);
+      return res.status(500).json({ error: 'Failed to load order line items' });
+    }
+
+    const byId = new Map((products || []).map((p) => [p.id, p]));
+
+    const lineItemRows = items.map((item) => {
+      const product = byId.get(item.product_id);
+      return {
+        order_id: order.id,
+        product_id: item.product_id,
+        product_name: product?.name || 'Unknown',
+        customer_email: email,
+        size: item.size,
+        quantity: item.quantity,
+        price_cents: product?.price_cents ?? 0,
+        status: 'completed',
+      };
+    });
+
+    const { error: lineItemsError } = await supabase
+      .from('store_orders')
+      .insert(lineItemRows);
+
+    if (lineItemsError) {
+      console.error('Error creating order line items:', lineItemsError);
+      return res.status(500).json({ error: 'Failed to create order line items' });
+    }
+
+    // Send ntfy notification
+    const ntfyTopic = process.env.NTFY_TOPIC || 'misfit-store-orders';
+    const ntfyUrl = `https://ntfy.sh/${ntfyTopic}`;
+
+    const itemLines = lineItemRows
+      .map((row) => `- ${row.product_name}${row.size ? ` (${row.size})` : ''} x${row.quantity}`)
+      .join('\n');
+
+    const notificationMessage = `
+New Order: #${order.id.slice(0, 8)}
+Email: ${email}
+Total: $${((session.amount_total ?? 0) / 100).toFixed(2)}
+${itemLines}
+    `.trim();
+
+    try {
+      await fetch(ntfyUrl, {
+        method: 'POST',
+        headers: { 'Title': `MISFIT Store Order` },
+        body: notificationMessage,
+      });
+    } catch (ntfyErr) {
+      console.warn('ntfy notification failed (non-blocking):', ntfyErr);
+    }
+
+    // TODO: Printify fulfillment and tithe-ledger writes are not implemented
+    // yet. They need: PRINTIFY_SHOP_ID, a confirmed PRINTIFY_API_KEY, and a
+    // populated store_variants table (product_id + size -> Printify variant
+    // id) before an order can be forwarded automatically. See
+    // HANDOFF-STRIPE.md for the open questions on this.
+
+    return res.status(200).json({ received: true, orderId: order.id });
+  } catch (err: any) {
+    console.error('Webhook processing error:', err);
+    return res.status(500).json({ error: err.message });
+  }
 }
