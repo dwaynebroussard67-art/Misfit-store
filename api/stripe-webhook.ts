@@ -10,6 +10,8 @@ export const config = {
   },
 };
 
+const TITHE_PERCENTAGE = 20;
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '');
 
 const supabase = createClient(
@@ -164,10 +166,23 @@ ${itemLines}
       console.warn('ntfy notification failed (non-blocking):', ntfyErr);
     }
 
-    // TODO: Printify fulfillment and tithe-ledger writes are not implemented
-    // yet. They need: PRINTIFY_SHOP_ID, a confirmed PRINTIFY_API_KEY, and a
-    // populated store_variants table (product_id + size -> Printify variant
-    // id) before an order can be forwarded automatically. See
+    // First-fruits: tithe a fixed percentage of every paid order.
+    const titheAmountCents = Math.round((session.amount_total ?? 0) * (TITHE_PERCENTAGE / 100));
+    const { error: titheError } = await supabase.from('tithe_ledger').insert({
+      order_id: order.id,
+      tithe_amount_cents: titheAmountCents,
+      percentage: TITHE_PERCENTAGE,
+    });
+
+    if (titheError) {
+      // Non-blocking: the order itself is already recorded above.
+      console.error('Error writing tithe ledger entry:', titheError);
+    }
+
+    // TODO: Printify fulfillment is not implemented yet. It needs a
+    // PRINTIFY_SHOP_ID, a confirmed PRINTIFY_API_KEY, and a populated
+    // store_variants table (product_id + size -> Printify variant id)
+    // before an order can be forwarded automatically. See
     // HANDOFF-STRIPE.md for the open questions on this.
 
     return res.status(200).json({ received: true, orderId: order.id });
