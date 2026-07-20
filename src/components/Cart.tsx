@@ -1,94 +1,140 @@
-import { CartItem } from '../lib/types'
-import { useState } from 'react'
+import { useAppData } from "@/context/AppDataContext";
+import { useCart } from "@/context/CartContext";
+import { formatMoney } from "@/lib/store";
+import { startCheckout } from "@/lib/data";
+import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
+import { useMemo, useState } from "react";
 
-interface CartProps {
-  items: CartItem[]
-  onRemove: (productId: string, size: string) => void
-  onClose: () => void
-}
+export function Cart() {
+  const { items, open, closeCart, subtotal, incrementItem, decrementItem, removeItem, clearCart } = useCart();
+  const { products, createOrder } = useAppData();
+  const [email, setEmail] = useState("");
 
-export default function Cart({ items, onRemove, onClose }: CartProps) {
-  const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const storeUrl = import.meta.env.VITE_STORE_URL?.trim() ?? "";
 
-  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const productMap = useMemo(() => new Map(products.map((product) => [product.id, product])), [products]);
+
+  const [checkingOut, setCheckingOut] = useState(false);
 
   const handleCheckout = async () => {
-    if (items.length === 0) return
-    
-    setIsCheckingOut(true)
-    try {
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items })
-      })
-      const data = await response.json()
-      if (data.url) window.location.href = data.url
-    } catch (err) {
-      alert('Checkout failed. Please try again.')
-      setIsCheckingOut(false)
+    if (items.length === 0 || checkingOut) {
+      return;
     }
-  }
+    setCheckingOut(true);
+
+    // Send ONLY product_id/size/quantity. The server reads real prices from the
+    // DB (checkout.ts) and returns a Stripe Checkout URL. No prices cross here.
+    const url = await startCheckout(
+      items.map((item) => ({
+        product_id: item.productId,
+        size: item.size,
+        quantity: item.quantity,
+      })),
+    );
+
+    setCheckingOut(false);
+
+    if (url) {
+      // The real order + tithe + Printify all happen in the Stripe webhook
+      // AFTER payment — not here. So we do NOT createOrder() on the client.
+      window.location.href = url;
+    }
+  };
 
   return (
-    <div className="container">
-      <button onClick={onClose} style={{ marginBottom: 20, color: 'var(--gold)' }}>← Back</button>
-      
-      <h2 style={{ marginBottom: 30 }}>Cart</h2>
+    <>
+      <button
+        type="button"
+        className={`cart-backdrop ${open ? "visible" : ""}`}
+        onClick={closeCart}
+        aria-label="Close cart"
+      />
 
-      {items.length === 0 ? (
-        <p style={{ color: 'rgba(237,230,217,0.6)' }}>Your cart is empty</p>
-      ) : (
-        <>
-          <div style={{ marginBottom: 40 }}>
-            {items.map(item => (
-              <div key={`${item.productId}-${item.size}`} style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                padding: '16px 0',
-                borderBottom: '1px solid rgba(212,175,55,0.1)'
-              }}>
-                <div>
-                  <div style={{ fontWeight: 600 }}>{item.name}</div>
-                  <div style={{ fontSize: 13, color: 'rgba(237,230,217,0.6)' }}>Size: {item.size} × {item.quantity}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ color: 'var(--gold)', marginBottom: 8 }}>${(item.price * item.quantity).toFixed(2)}</div>
-                  <button 
-                    onClick={() => onRemove(item.productId, item.size)}
-                    style={{ fontSize: 12, color: 'var(--blood)', opacity: 0.7 }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ))}
+      <aside className={`cart-drawer ${open ? "open" : ""}`} aria-hidden={!open}>
+        <div className="cart-header">
+          <div>
+            <p className="eyebrow">Cart drawer</p>
+            <h2>The loadout</h2>
           </div>
-
-          <div style={{ textAlign: 'right', marginBottom: 40 }}>
-            <div style={{ fontSize: 18, color: 'var(--gold)', fontWeight: 600 }}>
-              Total: ${total.toFixed(2)}
-            </div>
-          </div>
-
-          <button
-            onClick={handleCheckout}
-            disabled={isCheckingOut}
-            style={{
-              width: '100%',
-              padding: '16px',
-              background: 'var(--blood)',
-              color: 'var(--bone)',
-              fontSize: 16,
-              fontWeight: 600,
-              opacity: isCheckingOut ? 0.6 : 1
-            }}
-          >
-            {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
+          <button type="button" className="icon-btn" onClick={closeCart} aria-label="Close cart">
+            <X size={18} />
           </button>
-        </>
-      )}
-    </div>
-  )
+        </div>
+
+        <div className="cart-body">
+          {items.length === 0 ? (
+            <div className="empty-state">
+              <ShoppingBag size={22} />
+              <p>Your cart is empty. Add a piece from the Armory to begin the handoff.</p>
+            </div>
+          ) : (
+            items.map((item) => {
+              const product = productMap.get(item.productId);
+
+              return (
+                <article key={`${item.productId}-${item.size}`} className="cart-item">
+                  <img className="cart-item-image" src={product?.image} alt={product?.name ?? "Product"} />
+                  <div className="cart-item-copy">
+                    <div className="cart-item-head">
+                      <div>
+                        <h3>{product?.name ?? "Archived item"}</h3>
+                        <p>
+                          {item.size} • {formatMoney(item.price)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => removeItem(item.productId, item.size)}
+                        aria-label="Remove item"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+
+                    <div className="qty-row">
+                      <button type="button" className="qty-btn" onClick={() => decrementItem(item.productId, item.size)}>
+                        <Minus size={14} />
+                      </button>
+                      <span>{item.quantity}</span>
+                      <button type="button" className="qty-btn" onClick={() => incrementItem(item.productId, item.size)}>
+                        <Plus size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </div>
+
+        <div className="totals-panel">
+          <div className="field">
+            <label htmlFor="checkout-email">Email for the handoff record</label>
+            <input
+              id="checkout-email"
+              className="checkout-field"
+              type="email"
+              placeholder="you@notalone.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </div>
+
+          <div className="totals-row">
+            <span>Subtotal</span>
+            <strong>{formatMoney(subtotal)}</strong>
+          </div>
+          <div className="drawer-actions">
+            <button type="button" className="btn-subtle" onClick={clearCart} disabled={items.length === 0}>
+              Clear cart
+            </button>
+            <button type="button" className="btn-armory" onClick={handleCheckout} disabled={items.length === 0 || checkingOut}>
+              {checkingOut ? "Redirecting…" : "Proceed to checkout"}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
 }

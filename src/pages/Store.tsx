@@ -1,360 +1,362 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
-import {
-  fetchProducts, updateProduct, insertProduct, saveOrder,
-  type StoreProduct,
-} from '../lib/supabase'
-import { CartItem } from '../lib/types'
-import OwnerBar from '../components/OwnerBar'
-import ImagePicker from '../components/ImagePicker'
+import { HeroBanner } from "@/components/HeroBanner";
+import { useAppData } from "@/context/AppDataContext";
+import { useCart } from "@/context/CartContext";
+import { formatMoney, type Product, type ProductSize } from "@/lib/store";
+import { DndContext, PointerSensor, useDraggable, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { Grip, Star } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
-interface StoreProps {
-  onAddToCart: (item: CartItem) => void
+interface WindowPosition {
+  x: number;
+  y: number;
+  z: number;
 }
 
-type EditField = { id: string; field: 'price' | 'name' } | null
+type WindowMap = Record<string, WindowPosition>;
 
-export default function Store({ onAddToCart }: StoreProps) {
-  const [products, setProducts] = useState<StoreProduct[]>([])
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState(false)
-  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({})
+const POSITION_STORAGE_KEY = "misfit_window_positions";
+const WINDOW_WIDTH = 330;
 
-  // Forge Mode (owner editing)
-  const [forgeMode, setForgeMode] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [editing, setEditing] = useState<EditField>(null)
-  const [editValue, setEditValue] = useState('')
-  const [pickerFor, setPickerFor] = useState<string | null>(null)
+const defaultPositionFor = (index: number): WindowPosition => ({
+  x: 24 + (index % 3) * 360,
+  y: 24 + Math.floor(index / 3) * 408,
+  z: index + 1,
+});
 
-  // Drag state
-  const [dragId, setDragId] = useState<string | null>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
-  const dragIdRef = useRef<string | null>(null)
-  const productsRef = useRef<StoreProduct[]>([])
-  productsRef.current = products
+const readSavedPositions = (): WindowMap => {
+  if (typeof window === "undefined") {
+    return {};
+  }
 
-  const load = useCallback(async (includeHidden: boolean) => {
-    try {
-      setLoadError(false)
-      const data = await fetchProducts(includeHidden)
-      setProducts(data)
-    } catch (err) {
-      console.error('Failed to load products:', err)
-      setLoadError(true)
-    } finally {
-      setLoading(false)
+  try {
+    const raw = window.localStorage.getItem(POSITION_STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as WindowMap) : {};
+  } catch {
+    return {};
+  }
+};
+
+const persistPositions = (positions: WindowMap) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(positions));
+  } catch {
+    // Ignore storage write failures.
+  }
+};
+
+const hydratePositions = (products: Product[], current: WindowMap): WindowMap => {
+  const next = { ...current };
+
+  products.forEach((product, index) => {
+    if (!next[product.id]) {
+      next[product.id] = defaultPositionFor(index);
     }
-  }, [])
+  });
 
-  useEffect(() => { load(forgeMode) }, [load, forgeMode])
-
-  const persist = async (work: () => Promise<void>) => {
-    setSaving(true)
-    try {
-      await work()
-    } catch (err) {
-      console.error('Save failed:', err)
-      alert('Save failed. Check that you are signed in as the owner.')
-      await load(forgeMode)
-    } finally {
-      setSaving(false)
+  Object.keys(next).forEach((key) => {
+    if (!products.some((product) => product.id === key)) {
+      delete next[key];
     }
-  }
+  });
 
-  // ---------- Inline editing ----------
+  return next;
+};
 
-  const startEdit = (id: string, field: 'price' | 'name', current: string) => {
-    if (!forgeMode) return
-    setEditing({ id, field })
-    setEditValue(current)
-  }
+interface ProductWindowProps {
+  product: Product;
+  position: WindowPosition;
+  selectedSize?: ProductSize;
+  onFocus: (id: string) => void;
+  onSelectSize: (productId: string, size: ProductSize) => void;
+  onAdd: (product: Product) => void;
+  onPriceChange: (product: Product, value: string) => void;
+  adminLoggedIn: boolean;
+}
 
-  const commitEdit = () => {
-    if (!editing) return
-    const { id, field } = editing
-    const value = editValue.trim()
-    setEditing(null)
-    if (!value) return
+function ProductWindow({
+  product,
+  position,
+  selectedSize,
+  onFocus,
+  onSelectSize,
+  onAdd,
+  onPriceChange,
+  adminLoggedIn,
+}: ProductWindowProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: product.id });
 
-    if (field === 'price') {
-      const dollars = parseFloat(value.replace(/[$,\s]/g, ''))
-      if (isNaN(dollars) || dollars <= 0) return
-      const cents = Math.round(dollars * 100)
-      setProducts(prev => prev.map(p =>
-        p.id === id ? { ...p, price_cents: cents, price: cents / 100 } : p
-      ))
-      persist(() => updateProduct(id, { price_cents: cents }))
-    } else {
-      setProducts(prev => prev.map(p => (p.id === id ? { ...p, name: value } : p)))
-      persist(() => updateProduct(id, { name: value }))
-    }
-  }
+  const x = position.x + (transform?.x ?? 0);
+  const y = position.y + (transform?.y ?? 0);
 
-  // ---------- Artwork ----------
-
-  const changeImage = (id: string, url: string) => {
-    setPickerFor(null)
-    setProducts(prev => prev.map(p =>
-      p.id === id ? { ...p, image_url: url, image: url } : p
-    ))
-    persist(() => updateProduct(id, { image_url: url }))
-  }
-
-  // ---------- Visibility / add ----------
-
-  const toggleHidden = (p: StoreProduct) => {
-    const status = p.status === 'live' ? 'hidden' : 'live'
-    setProducts(prev => prev.map(x => (x.id === p.id ? { ...x, status } : x)))
-    persist(() => updateProduct(p.id, { status }))
-  }
-
-  const addWindow = () => {
-    persist(async () => {
-      const created = await insertProduct({
-        name: 'New Piece',
-        description: '',
-        price_cents: 2499,
-        image_url: '/images/products/design-01.jpg',
-        sizes: ['S', 'M', 'L', 'XL', '2XL'],
-        category: 'apparel',
-        status: 'hidden',
-        display_order: productsRef.current.length,
-      })
-      setProducts(prev => [...prev, created])
-    })
-  }
-
-  // ---------- Drag to arrange (pointer events: mouse + touch) ----------
-
-  const onDragStart = (e: React.PointerEvent, id: string) => {
-    if (!forgeMode) return
-    e.preventDefault()
-    dragIdRef.current = id
-    setDragId(id)
-    window.addEventListener('pointermove', onDragMove)
-    window.addEventListener('pointerup', onDragEnd, { once: true })
-  }
-
-  const onDragMove = (e: PointerEvent) => {
-    const id = dragIdRef.current
-    const grid = gridRef.current
-    if (!id || !grid) return
-    const windows = Array.from(grid.querySelectorAll<HTMLElement>('[data-window-id]'))
-    const from = productsRef.current.findIndex(p => p.id === id)
-    if (from < 0) return
-
-    let to = from
-    for (const el of windows) {
-      const r = el.getBoundingClientRect()
-      if (
-        e.clientX >= r.left && e.clientX <= r.right &&
-        e.clientY >= r.top && e.clientY <= r.bottom
-      ) {
-        const overId = el.dataset.windowId!
-        to = productsRef.current.findIndex(p => p.id === overId)
-        break
-      }
-    }
-    if (to !== from && to >= 0) {
-      setProducts(prev => {
-        const next = [...prev]
-        const [moved] = next.splice(from, 1)
-        next.splice(to, 0, moved)
-        return next
-      })
-    }
-  }
-
-  const onDragEnd = () => {
-    window.removeEventListener('pointermove', onDragMove)
-    dragIdRef.current = null
-    setDragId(null)
-    const ids = productsRef.current.map(p => p.id)
-    persist(() => saveOrder(ids))
-  }
-
-  // ---------- Cart ----------
-
-  const handleSelectSize = (productId: string, size: string) => {
-    setSelectedSizes(prev => ({ ...prev, [productId]: size }))
-  }
-
-  const handleAddToCart = (product: StoreProduct) => {
-    const size = selectedSizes[product.id]
-    if (!size) {
-      alert('Please select a size')
-      return
-    }
-    onAddToCart({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image || '',
-      size,
-      quantity: 1,
-    })
-    setSelectedSizes(prev => ({ ...prev, [product.id]: '' }))
-  }
-
-  // ---------- Render ----------
-
-  if (loading) {
-    return <div className="container hall-empty">Lighting the hall…</div>
-  }
-
-  const visible = forgeMode ? products : products.filter(p => p.status === 'live')
+  const style: CSSProperties = {
+    width: WINDOW_WIDTH,
+    transform: `translate3d(${x}px, ${y}px, 0) rotate(${isDragging ? 0.7 : 0}deg) scale(${isDragging ? 1.02 : 1})`,
+    zIndex: isDragging ? position.z + 1000 : position.z,
+  };
 
   return (
-    <div className="container hall">
-      <OwnerBar forgeMode={forgeMode} onForgeModeChange={setForgeMode} saving={saving} />
-
-      <header className="hall-head">
-        <h2>The Armory</h2>
-        <p>Wear the message. Every window holds a piece of the vault.</p>
+    <article
+      ref={setNodeRef}
+      className={`product-window ${isDragging ? "dragging" : ""}`}
+      style={style}
+      onMouseDown={() => onFocus(product.id)}
+      onTouchStart={() => onFocus(product.id)}
+    >
+      <header className="window-titlebar" {...listeners} {...attributes}>
+        <div className="window-controls" aria-hidden="true">
+          <span className="window-control blood" />
+          <span className="window-control ember" />
+          <span className="window-control gold" />
+        </div>
+        <span>{product.category}</span>
+        <span className="window-grip">
+          <Grip size={14} />
+          Drag
+        </span>
       </header>
 
-      {loadError && (
-        <div className="hall-empty">
-          The hall is dark right now — couldn't reach the vault. Refresh to try again.
+      <div className="window-body">
+        <div className="image-stack">
+          <img className="product-image" src={product.image} alt={product.name} draggable={false} />
+          {product.backImage ? <img className="image-secondary" src={product.backImage} alt={`${product.name} back`} draggable={false} /> : null}
         </div>
-      )}
 
-      {!loadError && visible.length === 0 && (
-        <div className="hall-empty">
-          {forgeMode
-            ? 'No windows yet. Add one below to begin.'
-            : 'The windows are being dressed. Check back soon.'}
+        <div className="product-meta">
+          <p className="meta-kicker">
+            {product.type}
+            {product.featured ? (
+              <span className="pill pill-gold compact">
+                <Star size={12} />
+                Featured
+              </span>
+            ) : null}
+          </p>
+          <h3 className="product-name">{product.name}</h3>
+          <p className="product-description">{product.description}</p>
         </div>
-      )}
 
-      <div className="windows" ref={gridRef}>
-        {visible.map(product => {
-          const isDragging = dragId === product.id
-          const isHidden = product.status === 'hidden'
-          const editingPrice = editing?.id === product.id && editing.field === 'price'
-          const editingName = editing?.id === product.id && editing.field === 'name'
-
-          return (
-            <article
-              key={product.id}
-              data-window-id={product.id}
-              className={[
-                'window',
-                forgeMode ? 'forge' : '',
-                isDragging ? 'dragging' : '',
-                isHidden ? 'shuttered' : '',
-              ].join(' ')}
+        <div className="size-row">
+          {product.sizes.map((size) => (
+            <button
+              key={size}
+              type="button"
+              className={`size-pill ${selectedSize === size ? "active" : ""}`}
+              onClick={() => onSelectSize(product.id, size)}
             >
-              {forgeMode && (
-                <div className="window-tools">
-                  <button
-                    className="drag-handle"
-                    onPointerDown={e => onDragStart(e, product.id)}
-                    aria-label="Drag to arrange"
-                    title="Drag to arrange"
-                  >
-                    ⠿
-                  </button>
-                  <button
-                    className="tool-btn"
-                    onClick={() => toggleHidden(product)}
-                    title={isHidden ? 'Show in store' : 'Hide from store'}
-                  >
-                    {isHidden ? '🕯 Unveil' : '⛧ Shutter'}
-                  </button>
-                </div>
-              )}
+              {size}
+            </button>
+          ))}
+        </div>
 
-              <div
-                className="window-glass"
-                onClick={() => forgeMode && setPickerFor(product.id)}
-                role={forgeMode ? 'button' : undefined}
-                title={forgeMode ? 'Tap to change artwork' : undefined}
-              >
-                {product.image
-                  ? <img src={product.image} alt={product.name} className="window-art" />
-                  : <div className="window-art placeholder">No artwork</div>}
-                {forgeMode && <div className="glass-hint">Tap to change artwork</div>}
-              </div>
+        <div className="product-footer">
+          <div className="price-stack">
+            <span className="price-label">Field price</span>
+            <strong className="price-value">{formatMoney(product.price)}</strong>
+            {adminLoggedIn ? (
+              <input
+                className="price-input"
+                type="number"
+                min="0"
+                step="0.01"
+                value={product.price}
+                onChange={(event) => onPriceChange(product, event.target.value)}
+                aria-label={`Edit price for ${product.name}`}
+              />
+            ) : null}
+          </div>
 
-              <div className="window-sill">
-                {editingName ? (
-                  <input
-                    className="inline-edit name"
-                    value={editValue}
-                    autoFocus
-                    onChange={e => setEditValue(e.target.value)}
-                    onBlur={commitEdit}
-                    onKeyDown={e => e.key === 'Enter' && commitEdit()}
-                  />
-                ) : (
-                  <div
-                    className={`window-name ${forgeMode ? 'editable' : ''}`}
-                    onClick={() => startEdit(product.id, 'name', product.name)}
-                  >
-                    {product.name}
-                  </div>
-                )}
-
-                {editingPrice ? (
-                  <input
-                    className="inline-edit price"
-                    value={editValue}
-                    autoFocus
-                    inputMode="decimal"
-                    onChange={e => setEditValue(e.target.value)}
-                    onBlur={commitEdit}
-                    onKeyDown={e => e.key === 'Enter' && commitEdit()}
-                  />
-                ) : (
-                  <button
-                    className={`plaque ${forgeMode ? 'editable' : ''}`}
-                    onClick={() => startEdit(product.id, 'price', product.price.toFixed(2))}
-                    disabled={!forgeMode}
-                  >
-                    ${product.price.toFixed(2)}
-                  </button>
-                )}
-
-                {!forgeMode && (
-                  <>
-                    <div className="product-sizes">
-                      {product.sizes.map(size => (
-                        <button
-                          key={size}
-                          onClick={() => handleSelectSize(product.id, size)}
-                          className={`size-btn ${selectedSizes[product.id] === size ? 'active' : ''}`}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                    <button onClick={() => handleAddToCart(product)} className="add-to-cart">
-                      Add to Cart
-                    </button>
-                  </>
-                )}
-              </div>
-            </article>
-          )
-        })}
-
-        {forgeMode && (
-          <button className="window add-window" onClick={addWindow}>
-            <span className="add-glyph">＋</span>
-            <span>New window</span>
-            <span className="add-note">Starts shuttered — unveil when ready</span>
+          <button type="button" className="btn-armory" onClick={() => onAdd(product)}>
+            Add to cart
           </button>
-        )}
+        </div>
       </div>
+    </article>
+  );
+}
 
-      {pickerFor && (
-        <ImagePicker
-          current={products.find(p => p.id === pickerFor)?.image_url ?? null}
-          onSelect={url => changeImage(pickerFor, url)}
-          onClose={() => setPickerFor(null)}
-        />
-      )}
+export default function Store() {
+  const { products, updateProduct, adminLoggedIn } = useAppData();
+  const { addItem } = useCart();
+  const liveProducts = useMemo(() => products.filter((product) => product.status === "live"), [products]);
+  const featuredProducts = useMemo(() => liveProducts.filter((product) => product.featured), [liveProducts]);
+  const categories = useMemo(() => ["All", ...new Set(liveProducts.map((product) => product.category))], [liveProducts]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, ProductSize>>({});
+  const initialPositions = hydratePositions(liveProducts, readSavedPositions());
+  const [positions, setPositions] = useState<WindowMap>(initialPositions);
+  const [toast, setToast] = useState<string | null>(null);
+  const zRef = useRef(
+    Math.max(
+      20,
+      ...Object.values(initialPositions).map((position) => position.z),
+    ),
+  );
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  useEffect(() => {
+    setPositions((current) => hydratePositions(liveProducts, current));
+  }, [liveProducts]);
+
+  useEffect(() => {
+    persistPositions(positions);
+  }, [positions]);
+
+  useEffect(() => {
+    if (!toast) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => setToast(null), 2200);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
+
+  const filteredProducts = useMemo(
+    () => liveProducts.filter((product) => activeCategory === "All" || product.category === activeCategory),
+    [activeCategory, liveProducts],
+  );
+
+  const canvasHeight = Math.max(780, Math.ceil(filteredProducts.length / 3) * 408 + 80);
+  const canvasWidth = 1120;
+
+  const liftWindow = useCallback((id: string) => {
+    zRef.current += 1;
+    setPositions((current) => ({
+      ...current,
+      [id]: {
+        ...(current[id] ?? { x: 0, y: 0, z: zRef.current }),
+        z: zRef.current,
+      },
+    }));
+  }, []);
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const id = String(event.active.id);
+    const deltaX = Math.round(event.delta.x);
+    const deltaY = Math.round(event.delta.y);
+
+    if (deltaX === 0 && deltaY === 0) {
+      return;
+    }
+
+    setPositions((current) => {
+      const existing = current[id] ?? { x: 0, y: 0, z: zRef.current };
+      return {
+        ...current,
+        [id]: {
+          ...existing,
+          x: existing.x + deltaX,
+          y: existing.y + deltaY,
+        },
+      };
+    });
+  }, []);
+
+  const handleSelectSize = (productId: string, size: ProductSize) => {
+    setSelectedSizes((current) => ({ ...current, [productId]: size }));
+  };
+
+  const handleAddToCart = (product: Product) => {
+    const fallbackSize = product.sizes.length === 1 ? product.sizes[0] : undefined;
+    const selectedSize = selectedSizes[product.id] ?? fallbackSize;
+
+    if (!selectedSize) {
+      setToast(`Choose a size for ${product.name} before adding it.`);
+      return;
+    }
+
+    addItem({
+      productId: product.id,
+      size: selectedSize,
+      quantity: 1,
+      price: product.price,
+    });
+
+    setToast(`${product.name} added to the cart.`);
+  };
+
+  const handlePriceChange = (product: Product, value: string) => {
+    if (!adminLoggedIn) {
+      return;
+    }
+
+    const parsedValue = Number.parseFloat(value);
+    if (!Number.isFinite(parsedValue) || parsedValue < 0) {
+      return;
+    }
+
+    updateProduct({ ...product, price: parsedValue });
+  };
+
+  return (
+    <div className="section-stack">
+      <HeroBanner />
+
+      <section className="featured-strip route-card">
+        <div>
+          <p className="eyebrow">Featured loadout</p>
+          <h2 className="section-title">Current highlighted drops</h2>
+        </div>
+        <div className="featured-row">
+          {featuredProducts.map((product) => (
+            <button key={product.id} type="button" className="featured-chip" onClick={() => setActiveCategory(product.category)}>
+              <Star size={14} />
+              {product.name}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="route-card">
+        <div className="canvas-header">
+          <div>
+            <p className="eyebrow">Windowed storefront</p>
+            <h2 className="section-title">Drag the pieces around the armory board</h2>
+          </div>
+          <p className="canvas-note">Only live products are deployed here. Draft and hidden pieces remain in Command Center.</p>
+        </div>
+
+        <div className="category-row">
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className={`filter-pill ${activeCategory === category ? "active" : ""}`}
+              onClick={() => setActiveCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <DndContext sensors={sensors} onDragStart={({ active }) => liftWindow(String(active.id))} onDragEnd={handleDragEnd}>
+        <section className="canvas-shell route-card">
+          <div className="canvas-scroll">
+            <div className="canvas" style={{ height: canvasHeight, minWidth: canvasWidth }}>
+              {filteredProducts.map((product) => (
+                <ProductWindow
+                  key={product.id}
+                  product={product}
+                  position={positions[product.id] ?? defaultPositionFor(0)}
+                  selectedSize={selectedSizes[product.id]}
+                  onFocus={liftWindow}
+                  onSelectSize={handleSelectSize}
+                  onAdd={handleAddToCart}
+                  onPriceChange={handlePriceChange}
+                  adminLoggedIn={adminLoggedIn}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      </DndContext>
+
+      {toast ? <div className="toast">{toast}</div> : null}
     </div>
-  )
+  );
 }

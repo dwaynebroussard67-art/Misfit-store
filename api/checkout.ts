@@ -27,8 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const ids = items.map(i => i.productId)
     const { data: products, error } = await supabase
       .from('store_products')
- 
-     .select('id, name, price_cents, status')
+      .select('id, name, price_cents, status')
       .in('id', ids)
 
     if (error) return res.status(500).json({ error: error.message })
